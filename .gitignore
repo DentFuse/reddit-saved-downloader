@@ -1,0 +1,7 @@
+node_modules
+saves/*
+!saves/.gitkeep
+data.json
+config.json
+out/*
+!out/.gitkeep

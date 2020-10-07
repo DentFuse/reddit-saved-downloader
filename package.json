@@ -1,0 +1,19 @@
+{
+  "name": "reddit-saved-downloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cli-progress": "^3.8.2",
+    "enquirer": "^2.3.6",
+    "got": "^11.7.0",
+    "signale": "^1.4.0",
+    "snoowrap": "^1.21.0"
+  }
+}

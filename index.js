@@ -2,7 +2,7 @@ const snoowrap = require('snoowrap');
 const cliProgress = require('cli-progress');
 const got = require('got');
 const signale = require('signale');
-const { prompt, Password } = require('enquirer');
+const { prompt, Password, select } = require('enquirer');
 const fs = require('fs');
 
 const logins = require('./config');
@@ -17,32 +17,51 @@ function simplePrompt(name) {
 	}
 }
 
+function getAccountOptions() {
+	//const accs = fs.readdirSync('./saves').map(s => s.split('.')[0]).filter(s => s !== '');
+	const accs = [];
+	if(fs.existsSync('./' + dataFile)) {
+		const accFile = JSON.parse(fs.readFileSync('./' + dataFile, 'utf-8'));
+		for(const e of Object.keys(accFile)) accs.push(e);
+	}
+	accs.push('Add New Account');
+	return accs;
+}
+
 async function main() {
-	let firstStart = false, loginData;
+	let addAccount = false, loginData, currentLogin;
 	if(!fs.existsSync('./' + dataFile)) {
-		firstStart = true;
-		signale.start('Welcome, please setup script for first use...');
+		addAccount = true;
+		signale.start('Welcome, please add account for first use...');
+		loginData = {};
+	} else {
+		loginData = JSON.parse(fs.readFileSync('./' + dataFile, 'utf-8'));
+	}
+	const account = await select({ name: 'account', message: 'Please select an account or add a new account.', choices: getAccountOptions()});
+	if(account !== 'Add New Account') {
+		currentLogin = loginData[account]
+	}
+	addAccount = addAccount || account === 'Add New Account';
+	if(addAccount) {
 		const clientId = (await prompt(simplePrompt('clientId'))).clientId;
 		const clientSecret = (await prompt(simplePrompt('clientSecret'))).clientSecret;
 		const username = (await prompt(simplePrompt('username'))).username;
-		loginData = { clientId, clientSecret, username };
-		fs.writeFileSync('./data.json', JSON.stringify(loginData));
-	} else {
-		loginData = JSON.parse(fs.readFileSync('./data.json'));
+		currentLogin = { clientId, clientSecret, username };
+		loginData[username] = (currentLogin);
 	}
 	const password = (await prompt({ type: 'password', name: 'password', message: 'Please enter your password, this will not be saved and you will be required to enter it everytime you start the script.'})).password;
-	loginData.password = password;
-	loginData.userAgent = 'Personal Saved Post Image Downloader';
+	currentLogin.password = password;
+	currentLogin.userAgent = 'Personal Saved Post Image Downloader';
 	signale.info('Attempting login...');
 	try {
-		const snoo = new snoowrap(loginData);
+		const snoo = new snoowrap(currentLogin);
 		await snoo.getMe();
 		signale.success('Successfully logged in!');
-		start(snoo, loginData.username);
+		if(addAccount) fs.writeFileSync('./' + dataFile, JSON.stringify(loginData));
+		start(snoo, currentLogin.username);
 	} catch (e) {
 		signale.fatal('An error occured, if you\'ve just entered your login data, please restart script and double check that everything is correct.')
 		signale.error(e);
-		if(firstStart) fs.unlinkSync('./data.json');
 		process.exit(0);
 	}
 }
@@ -61,14 +80,14 @@ function reduceData(e) {
 
 async function start(snoo, username) {
 	let newArr;
-	if(!fs.existsSync(username + '.json')) {
+	if(!fs.existsSync('./saves/' + username + '.json')) {
 		signale.warn('Couldn\'t find account file, getting all...');
 		const saved = await snoo.getMe().getSavedContent().fetchAll();
 		newArr = saved.map(reduceData);
-		fs.writeFileSync(username + '.json', JSON.stringify(newArr));
+		fs.writeFileSync('./saves/' + username + '.json', JSON.stringify(newArr));
 		downloadHandler(newArr, username)
 	} else {
-		const local = JSON.parse(fs.readFileSync(username + '.json', 'utf-8'));
+		const local = JSON.parse(fs.readFileSync('./saves/' + username + '.json', 'utf-8'));
 		const last = local[0].name;
 		let index = -1, arr;
 		while(index == -1) {
@@ -128,7 +147,7 @@ async function downloadHandler(arr, username, local) {
 	bar.stop();
 	signale.timeEnd('Timer');
 	signale.complete('Complete!');
-	if(local) fs.writeFileSync(username + '.json', JSON.stringify(arr.concat(local)));
+	if(local) fs.writeFileSync('./saves/' + username + '.json', JSON.stringify(arr.concat(local)));
 }
 
 function logWhileBar(bar, message, count, total, type) {

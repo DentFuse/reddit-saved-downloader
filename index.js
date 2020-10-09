@@ -89,11 +89,16 @@ async function start(snoo, username) {
 	} else {
 		const local = JSON.parse(fs.readFileSync('./saves/' + username + '.json', 'utf-8'));
 		const last = local[0].name;
-		let index = -1, arr;
+		let index = -1, arr, reducedArr;
 		while(index == -1) {
-			arr = await snoo.getMe().getSavedContent().fetchMore({amount: 100, skipReplies: true})
-			arr = arr.map(reduceData);
-			index = arr.findIndex(e => e.name === last);
+			if(!arr) {
+				arr = await snoo.getMe().getSavedContent({amount: 100, skipReplies: true}).fetchMore({amount: 100, skipReplies: true});
+			} else {
+				arr = await arr.fetchMore({amount: 100, skipReplies: true});
+			}
+			reducedArr = arr.map(reduceData);
+			index = reducedArr.findIndex(e => e.name === last);
+			console.log(reducedArr.length, index);
 		}
 		newArr = arr.slice(0, index);
 		downloadHandler(newArr, username, local)

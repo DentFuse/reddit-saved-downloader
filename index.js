@@ -46,7 +46,7 @@ async function main() {
 		const clientSecret = (await prompt(simplePrompt('clientSecret'))).clientSecret;
 		const username = (await prompt(simplePrompt('username'))).username;
 		currentLogin = { clientId, clientSecret, username };
-		loginData[username] = (currentLogin);
+		loginData[username] = Object.assign({}, currentLogin);
 	}
 	const password = (await prompt({ type: 'password', name: 'password', message: 'Please enter your password, this will not be saved and you will be required to enter it everytime you start the script.'})).password;
 	currentLogin.password = password;

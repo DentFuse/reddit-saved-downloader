@@ -18,7 +18,6 @@ function simplePrompt(name) {
 }
 
 function getAccountOptions() {
-	//const accs = fs.readdirSync('./saves').map(s => s.split('.')[0]).filter(s => s !== '');
 	const accs = [];
 	if(fs.existsSync('./' + dataFile)) {
 		const accFile = JSON.parse(fs.readFileSync('./' + dataFile, 'utf-8'));
@@ -100,7 +99,7 @@ async function start(snoo, username) {
 			index = reducedArr.findIndex(e => e.name === last);
 			console.log(reducedArr.length, index);
 		}
-		newArr = arr.slice(0, index);
+		newArr = reducedArr.slice(0, index);
 		downloadHandler(newArr, username, local)
 	}
 }

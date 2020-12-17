@@ -5,7 +5,6 @@ const signale = require('signale');
 const { prompt, Password, select } = require('enquirer');
 const fs = require('fs');
 
-const logins = require('./config');
 const dataFile = 'data.json';
 const supported =  ['jpg', 'png'] //['i.redd.it', 'i.imgur.com'];
 

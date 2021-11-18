@@ -12,7 +12,7 @@
   "dependencies": {
     "cli-progress": "^3.8.2",
     "enquirer": "^2.3.6",
-    "got": "^11.8.0",
+    "got": "^11.8.3",
     "signale": "^1.4.0",
     "snoowrap": "^1.21.0"
   }

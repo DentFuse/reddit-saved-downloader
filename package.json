@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cli-progress": "^3.10.0",
+    "cli-progress": "^3.12.0",
     "enquirer": "^2.3.6",
     "got": "^12.5.3",
     "signale": "^1.4.0",
